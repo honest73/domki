@@ -18,6 +18,19 @@ model Cottage {
   capacity       Int           @default(6)
   // Link iCal eksportu z Booking.com — zajętość zaciągamy do siebie
   bookingIcalUrl String?
+
+  // Dane prezentacyjne (oferta). Część zweryfikowana z publicznych źródeł,
+  // ceny/zdjęcia/opis własny do uzupełnienia przez właściciela (z FB).
+  description String? // opis marketingowy
+  areaM2      Int? // metraż
+  bedrooms    Int? // liczba sypialni
+  beds        String? // np. "1 podwójne, 2 pojedyncze + sofa"
+  amenities   String? // JSON: lista udogodnień
+  pricePerNight Int? // PLN za dobę; null = „cena na zapytanie"
+  petsAllowed Boolean @default(false)
+  address     String?
+  photos      String? // JSON: lista URLi zdjęć
+
   reservations   Reservation[]
   createdAt      DateTime      @default(now())
 }
