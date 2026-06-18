@@ -24,29 +24,44 @@ sprzątania** dla pani sprzątającej.
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS · Prisma 6 · SQLite.
-Zmiana bazy na Postgres = podmiana `provider` w `prisma/schema.prisma`
-i `DATABASE_URL`.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS · Prisma 6 · PostgreSQL.
 
 ## Uruchomienie lokalne
 
+Wymaga bazy PostgreSQL (np. darmowa „dev branch" w Neon albo lokalny Docker:
+`docker run -e POSTGRES_PASSWORD=haslo -p 5432:5432 postgres`).
+
 ```bash
 npm install
-cp .env.example .env      # uzupełnij hasło, sekret i token
-npm run db:push           # utwórz bazę z schematu
-npm run db:seed           # dodaj domki Bryziówka 1 i 2
-npm run dev               # http://localhost:3000
+cp .env.example .env       # uzupełnij DATABASE_URL/DIRECT_URL, hasło, sekret i token
+npx prisma migrate deploy  # utwórz tabele z migracji
+npm run db:seed            # dodaj domki Bryziówka 1 i 2
+npm run dev                # http://localhost:3000
 ```
 
 ## Konfiguracja (`.env`)
 
-| Zmienna          | Opis                                                          |
-| ---------------- | ------------------------------------------------------------ |
-| `DATABASE_URL`   | Połączenie z bazą (domyślnie SQLite `file:./dev.db`)         |
-| `OWNER_PASSWORD` | Hasło właściciela do panelu (jawne lub hash bcrypt `$2...`)  |
-| `SESSION_SECRET` | Długi losowy sekret do podpisywania sesji                    |
-| `CLEANING_TOKEN` | Token w linku grafiku: `/sprzatanie/<TOKEN>`                 |
-| `APP_URL`        | Publiczny adres aplikacji (do linków iCal i grafiku)        |
+| Zmienna          | Opis                                                         |
+| ---------------- | ----------------------------------------------------------- |
+| `DATABASE_URL`   | Postgres — połączenie pooled (runtime)                      |
+| `DIRECT_URL`     | Postgres — połączenie bezpośrednie (migracje)               |
+| `OWNER_PASSWORD` | Hasło właściciela do panelu (jawne lub hash bcrypt `$2...`) |
+| `SESSION_SECRET` | Długi losowy sekret do podpisywania sesji                   |
+| `CLEANING_TOKEN` | Token w linku grafiku: `/sprzatanie/<TOKEN>`                |
+| `APP_URL`        | Publiczny adres aplikacji (do linków iCal i grafiku)       |
+
+## Deploy na Vercel + Neon
+
+1. **Baza:** załóż projekt na [neon.tech](https://neon.tech), skopiuj dwa
+   connection stringi: *pooled* → `DATABASE_URL`, *direct* → `DIRECT_URL`.
+2. **Vercel:** zaimportuj repozytorium na [vercel.com](https://vercel.com)
+   (framework wykryje się jako Next.js).
+3. **Zmienne środowiskowe** w ustawieniach projektu Vercel: `DATABASE_URL`,
+   `DIRECT_URL`, `OWNER_PASSWORD`, `SESSION_SECRET`, `CLEANING_TOKEN`,
+   `APP_URL` (np. `https://twoja-domena.vercel.app`).
+4. **Deploy.** `vercel.json` uruchamia automatycznie:
+   `prisma generate → prisma migrate deploy → seed → next build`
+   (seed jest idempotentny i **nie nadpisuje** edytowanej oferty).
 
 ## Adresy
 

@@ -40,7 +40,7 @@ for (const c of cottages) {
   const { slug, ...rest } = c;
   await prisma.cottage.upsert({
     where: { slug },
-    update: rest,
+    update: {}, // istniejący domek zostaje nietknięty (chronimy edycje właściciela)
     create: { slug, ...rest },
   });
   console.log(`✓ ${c.name}`);
