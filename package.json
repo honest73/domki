@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:prod": "node server.js",
     "lint": "eslint",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.mjs",
+    "db:setup": "prisma db push && node prisma/seed.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {

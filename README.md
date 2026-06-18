@@ -24,45 +24,54 @@ sprzątania** dla pani sprzątającej.
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS · Prisma 6 · PostgreSQL.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS · Prisma 6 · SQLite
+(baza to plik na serwerze — bez zewnętrznej bazy danych).
 
 ## Uruchomienie lokalne
 
-Wymaga bazy PostgreSQL (np. darmowa „dev branch" w Neon albo lokalny Docker:
-`docker run -e POSTGRES_PASSWORD=haslo -p 5432:5432 postgres`).
-
 ```bash
 npm install
-cp .env.example .env       # uzupełnij DATABASE_URL/DIRECT_URL, hasło, sekret i token
-npx prisma migrate deploy  # utwórz tabele z migracji
-npm run db:seed            # dodaj domki Bryziówka 1 i 2
-npm run dev                # http://localhost:3000
+cp .env.example .env   # uzupełnij hasło, sekret i token
+npm run db:setup       # utwórz bazę SQLite + dodaj domki Bryziówka 1 i 2
+npm run dev            # http://localhost:3000
 ```
 
 ## Konfiguracja (`.env`)
 
 | Zmienna          | Opis                                                         |
 | ---------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`   | Postgres — połączenie bezpośrednie (host bez `-pooler`)     |
+| `DATABASE_URL`   | Ścieżka pliku SQLite, np. `file:./prod.db` (w katalogu `prisma/`) |
 | `OWNER_PASSWORD` | Hasło właściciela do panelu (jawne lub hash bcrypt `$2...`) |
 | `SESSION_SECRET` | Długi losowy sekret do podpisywania sesji                   |
 | `CLEANING_TOKEN` | Token w linku grafiku: `/sprzatanie/<TOKEN>`                |
 | `APP_URL`        | Publiczny adres aplikacji (do linków iCal i grafiku)       |
 
-## Deploy na Vercel + Neon
+## Deploy na seohost.pl (DirectAdmin, Node.js)
 
-1. **Baza:** załóż projekt na [neon.tech](https://neon.tech) i skopiuj
-   connection string. W okienku Neona **odznacz „Pooled connection"** — bierzemy
-   adres bezpośredni (host bez `-pooler`). Jeden adres działa i dla aplikacji,
-   i dla migracji.
-2. **Vercel:** zaimportuj repozytorium na [vercel.com](https://vercel.com)
-   (framework wykryje się jako Next.js).
-3. **Zmienne środowiskowe** w ustawieniach projektu Vercel: `DATABASE_URL`,
-   `OWNER_PASSWORD`, `SESSION_SECRET`, `CLEANING_TOKEN`,
-   `APP_URL` (np. `https://twoja-domena.vercel.app`).
-4. **Deploy.** `vercel.json` uruchamia automatycznie:
-   `prisma generate → prisma migrate deploy → seed → next build`
-   (seed jest idempotentny i **nie nadpisuje** edytowanej oferty).
+Aplikacja startuje plikiem `server.js` i trzyma dane w pliku SQLite —
+nie potrzebuje zewnętrznej bazy.
+
+1. **Wgraj pliki** projektu do katalogu poza `public_html`
+   (np. `~/aplikacje/bryziowka`) — przez Git, FTP albo Menedżer plików.
+2. **Terminal SSH** (DirectAdmin → Terminal) w katalogu aplikacji:
+   ```bash
+   npm install
+   cp .env.example .env   # i ustaw hasło, SESSION_SECRET, CLEANING_TOKEN, APP_URL
+   npm run db:setup       # tworzy bazę SQLite i dodaje oba domki
+   npm run build
+   ```
+3. **DirectAdmin → Setup Node.js App** (kreator aplikacji Node.js):
+   - *Application Root:* katalog aplikacji (np. `aplikacje/bryziowka`)
+   - *Application startup file:* `server.js`
+   - *Node version:* 20 lub nowsza
+   - *Environment:* `production`
+   - zapisz i **Start/Restart**. Panel sam utworzy `.htaccess` z proxy.
+4. Aplikacja działa pod **adresem technicznym** przypisanym do tej aplikacji
+   (domena nie jest wymagana). Ten adres wpisz też jako `APP_URL` w `.env`
+   i zrestartuj aplikację.
+
+> Po zmianach w kodzie: `git pull && npm install && npm run build`, a potem
+> **Restart** aplikacji w panelu. Plik bazy (`prisma/prod.db`) zostaje nietknięty.
 
 ## Adresy
 
