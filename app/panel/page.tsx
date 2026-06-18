@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isLoggedIn } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -39,6 +40,12 @@ export default async function PanelPage() {
           <p className="text-sm text-stone-500">Miłków · Bryziówka 1 i 2</p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/panel/oferta"
+            className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium hover:bg-stone-100"
+          >
+            Edytuj ofertę
+          </Link>
           <form action={syncBooking}>
             <button className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium hover:bg-stone-100">
               ↻ Synchronizuj Booking

@@ -54,6 +54,52 @@ export async function deleteReservation(formData: FormData) {
   }
 }
 
+/** Zapisuje dane prezentacyjne domku (oferta) edytowane z panelu. */
+export async function updateCottageDetails(_prev: string | undefined, formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return "Brak identyfikatora domku.";
+
+  const num = (key: string): number | null => {
+    const raw = String(formData.get(key) ?? "").trim();
+    if (raw === "") return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  };
+  const text = (key: string): string | null => {
+    const v = String(formData.get(key) ?? "").trim();
+    return v === "" ? null : v;
+  };
+  // Pola wieloliniowe (udogodnienia, zdjęcia) → tablica JSON
+  const lines = (key: string): string =>
+    JSON.stringify(
+      String(formData.get(key) ?? "")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+
+  await prisma.cottage.update({
+    where: { id },
+    data: {
+      name: text("name") ?? undefined,
+      description: text("description"),
+      pricePerNight: num("pricePerNight"),
+      capacity: num("capacity") ?? 6,
+      areaM2: num("areaM2"),
+      bedrooms: num("bedrooms"),
+      beds: text("beds"),
+      address: text("address"),
+      petsAllowed: formData.get("petsAllowed") === "on",
+      amenities: lines("amenities"),
+      photos: lines("photos"),
+    },
+  });
+
+  revalidatePath("/panel/oferta");
+  revalidatePath("/oferta");
+  return "Zapisano zmiany ✓";
+}
+
 export async function saveBookingUrl(formData: FormData) {
   const cottageId = String(formData.get("cottageId") ?? "");
   const url = String(formData.get("bookingIcalUrl") ?? "").trim() || null;
