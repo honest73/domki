@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "prisma generate && prisma migrate deploy && node prisma/seed.mjs && next build",
+  "buildCommand": "export DATABASE_URL=\"${DATABASE_URL:-${POSTGRES_URL_NON_POOLING:-${POSTGRES_PRISMA_URL:-$POSTGRES_URL}}}\" && prisma generate && prisma migrate deploy && node prisma/seed.mjs && next build",
   "framework": "nextjs"
 }
