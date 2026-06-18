@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") // połączenie pooled (Neon, pgBouncer) — runtime
-  directUrl = env("DIRECT_URL") // połączenie bezpośrednie — migracje
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 /// Domek (Bryziówka 1, Bryziówka 2)

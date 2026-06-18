@@ -43,8 +43,7 @@ npm run dev                # http://localhost:3000
 
 | Zmienna          | Opis                                                         |
 | ---------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`   | Postgres — połączenie pooled (runtime)                      |
-| `DIRECT_URL`     | Postgres — połączenie bezpośrednie (migracje)               |
+| `DATABASE_URL`   | Postgres — połączenie bezpośrednie (host bez `-pooler`)     |
 | `OWNER_PASSWORD` | Hasło właściciela do panelu (jawne lub hash bcrypt `$2...`) |
 | `SESSION_SECRET` | Długi losowy sekret do podpisywania sesji                   |
 | `CLEANING_TOKEN` | Token w linku grafiku: `/sprzatanie/<TOKEN>`                |
@@ -52,12 +51,14 @@ npm run dev                # http://localhost:3000
 
 ## Deploy na Vercel + Neon
 
-1. **Baza:** załóż projekt na [neon.tech](https://neon.tech), skopiuj dwa
-   connection stringi: *pooled* → `DATABASE_URL`, *direct* → `DIRECT_URL`.
+1. **Baza:** załóż projekt na [neon.tech](https://neon.tech) i skopiuj
+   connection string. W okienku Neona **odznacz „Pooled connection"** — bierzemy
+   adres bezpośredni (host bez `-pooler`). Jeden adres działa i dla aplikacji,
+   i dla migracji.
 2. **Vercel:** zaimportuj repozytorium na [vercel.com](https://vercel.com)
    (framework wykryje się jako Next.js).
 3. **Zmienne środowiskowe** w ustawieniach projektu Vercel: `DATABASE_URL`,
-   `DIRECT_URL`, `OWNER_PASSWORD`, `SESSION_SECRET`, `CLEANING_TOKEN`,
+   `OWNER_PASSWORD`, `SESSION_SECRET`, `CLEANING_TOKEN`,
    `APP_URL` (np. `https://twoja-domena.vercel.app`).
 4. **Deploy.** `vercel.json` uruchamia automatycznie:
    `prisma generate → prisma migrate deploy → seed → next build`
